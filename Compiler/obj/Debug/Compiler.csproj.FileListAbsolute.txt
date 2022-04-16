@@ -1,0 +1,16 @@
+D:\VS2019\Compiler\bin\Debug\Compiler.exe.config
+D:\VS2019\Compiler\bin\Debug\Compiler.exe
+D:\VS2019\Compiler\bin\Debug\Compiler.pdb
+D:\VS2019\Compiler\obj\Debug\Compiler.csproj.AssemblyReference.cache
+D:\VS2019\Compiler\obj\Debug\Compiler.csproj.SuggestedBindingRedirects.cache
+D:\VS2019\Compiler\obj\Debug\MainWindow.g.cs
+D:\VS2019\Compiler\obj\Debug\App.g.cs
+D:\VS2019\Compiler\obj\Debug\Compiler_MarkupCompile.cache
+D:\VS2019\Compiler\obj\Debug\Compiler_MarkupCompile.lref
+D:\VS2019\Compiler\obj\Debug\MainWindow.baml
+D:\VS2019\Compiler\obj\Debug\Compiler.g.resources
+D:\VS2019\Compiler\obj\Debug\Compiler.Properties.Resources.resources
+D:\VS2019\Compiler\obj\Debug\Compiler.csproj.GenerateResource.cache
+D:\VS2019\Compiler\obj\Debug\Compiler.csproj.CoreCompileInputs.cache
+D:\VS2019\Compiler\obj\Debug\Compiler.exe
+D:\VS2019\Compiler\obj\Debug\Compiler.pdb
