@@ -470,8 +470,9 @@ namespace Compiler
                         break;
                     }
                 }
-                operators = new Stack<Token>();
-                IntOrVariables = new Stack<int>();
+                //operators = new Stack<Token>();
+                //IntOrVariables = new Stack<int>();
+                IntOrVariables.Clear();
             }
         }
     }

@@ -34,6 +34,7 @@ namespace Compiler
 
             try
             {
+                OutputText.Text=String.Empty;
                 OutputText.Foreground = new SolidColorBrush(Color.FromRgb(223,217,190));
 
                 Tokenizer tokenizer = new Tokenizer(InputTextBox.Text);
@@ -69,7 +70,6 @@ namespace Compiler
                 OutputText.Foreground = Brushes.Red;
                 OutputText.Text = ex.Message+"\n"+"Сторонняя ошибка";
             }
-
         }
 
 
