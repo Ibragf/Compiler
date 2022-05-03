@@ -15,9 +15,12 @@ namespace Compiler
         public AnalyzerOfTokens(Tokenizer tokenizer)
         {
             this.tokens = tokenizer.tokens;
-            Definations = new List<List<Token>>();
-            arithmeticExpressions = new List<List<Token>>();
-            CheckTokens();
+            if (tokens.Count > 0)
+            {
+                Definations = new List<List<Token>>();
+                arithmeticExpressions = new List<List<Token>>();
+                CheckTokens();
+            }
         }
 
         private void CheckTokens()

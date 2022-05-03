@@ -26,11 +26,14 @@ namespace Compiler
             Definations = analyzer.Definations;
             Expressions = analyzer.arithmeticExpressions;
 
-            CheckDefinations();
-            isParenthesesBalanced();
-            CheckRightPart();
-            SeparatorOfExpressions();
-            Calculate();
+            if (Definations != null && Expressions != null)
+            {
+                CheckDefinations();
+                isParenthesesBalanced();
+                CheckRightPart();
+                SeparatorOfExpressions();
+                Calculate();
+            }
         }
 
         public List<Token> GetVariables()
@@ -38,32 +41,7 @@ namespace Compiler
             return variables;
         }
 
-        /*private void FindErrorType()
-        {
-            for(int i = 0; i < Definations.Count; i++)
-            {
-                List<Token> defination = Definations[i];
-                foreach (Token token in defination)
-                {
-                    if (token.TokenType == Type.Error)
-                    {
-                        throw new MyException("Использование недопустимых символов",token.line,token.index);
-                    }
-                }
-            }
-            for (int i = 0; i < Expressions.Count; i++)
-            {
-                List<Token> expression = Definations[i];
-                foreach (Token token in expression)
-                {
-                    if (token.TokenType == Type.Error)
-                    {
-                        throw new MyException("Использование недопустимых символов", token.line, token.index);
-                    }
-                }
-            }
-        }
-        */
+
         private void CheckDefinations()
         {
             if(Definations.Count==0)
@@ -152,26 +130,43 @@ namespace Compiler
                     if(expression[j].TokenType==Type.Operator && (j+1>=expression.Count ||
                         (expression[j+1].TokenType!=Type.Variable && expression[j+1].TokenType != Type.Integer)))
                     {
-                        if (j + 1 >= expression.Count && expression[j].name != ")") {
+                        if (j == expression.Count-1 && expression[j].name != ")") {
 
                             throw new MyException("После оператора должны быть переменная или целое число", expression[j].line, expression[j].index);
                         }
                         //if(j+1>=expression.Count) throw new MyException("После оператора должны быть переменная или целое число", expression[j].line, expression[j].index);
                         if(j + 1 < expression.Count)
                         {
-                            if (expression[j].name == "(" && expression[j + 1].TokenType == Type.Operator && expression[j + 1].name != "(")
-                                throw new MyException("После оператора должны быть переменная или целое число", expression[j].line, expression[j].index);
-
-                            if (expression[j].name != ")" && expression[j + 1].name != "(")
+                            if(expression[j].name=="-" && expression[j+1].name!="(")
                             {
                                 throw new MyException("После оператора должны быть переменная или целое число", expression[j].line, expression[j].index);
                             }
 
-                            if (expression[j].name == ")" && expression[j + 1].TokenType != Type.Operator)
+                            if (expression[j].name == "(" && expression[j + 1].TokenType == Type.Operator && expression[j + 1].name != "(" && expression[j + 1].name != "-")
+                                throw new MyException("После оператора должны быть переменная или целое число", expression[j].line, expression[j].index);
+                            /*if (expression[j].name == ")" && expression[j + 1].TokenType == Type.Variable && expression[j + 1].name != ")")
+                                throw new MyException("После оператора должны быть переменная или целое число", expression[j].line, expression[j].index);
+                            */
+                            /*if (expression[j+1].name == "-" &&  (expression[j].name != ")" && expression[j].name != "^" && expression[j + 1].name != "("))
                             {
-                                throw new MyException("После оператора должeн быть оператор", expression[j].line, expression[j].index);
+                                throw new MyException("После оператора должны быть переменная или целое число1", expression[j].line, expression[j].index);
+                            }*/
+
+                            if((expression[j+1].TokenType==Type.Operator && expression[j+1].name!="(" && expression[j+1].name!="^" && expression[j].name != ")") &&
+                                !(expression[j].name=="(" && expression[j+1].name=="-"))
+                            {
+                                throw new MyException("После оператора должны быть переменная или целое число1", expression[j].line, expression[j].index);
+                            }
+
+                            if (expression[j].name == ")" && (expression[j + 1].TokenType != Type.Operator || expression[j + 1].name == "("))
+                            {
+                                throw new MyException("После оператора должeн быть оператор(не \"(\")", expression[j].line, expression[j].index);
                             }
                         }
+                    }
+                    if (j + 1 < expression.Count && expression[j].name == ")" && expression[j + 1].TokenType != Type.Operator)
+                    {
+                        throw new MyException("После оператора должeн быть оператор", expression[j].line, expression[j].index);
                     }
                     /*if(expression[j-1].name!="=" && expression[j-1].TokenType==Type.Operator && expression[j].TokenType == Type.Operator)
                     {
@@ -192,15 +187,23 @@ namespace Compiler
             for (int i = 0; i < RightPartsOfExpressions.Count; i++)
             {
                 bool flag = false;
+                bool variableFlag = false;
+                Token globalOpenPar = null;
                 rightPart=RightPartsOfExpressions[i];
                 if (rightPart[0].TokenType ==Type.Operator  && operators.Count == 0)
                 {
                     if(rightPart[0].name !="-" && rightPart[0].name != "(")
                         throw new MyException("Перед оператором должны быть переменная или целое число",rightPart[0].line, rightPart[0].index);
 
-                    if((rightPart[1].TokenType ==Type.Integer || rightPart[1].TokenType==Type.Variable) && rightPart[0].name!="(")
+                    if(rightPart[1].TokenType ==Type.Integer && rightPart[0].name!="(")
                     {
                         rightPart[1].tokenValue = -rightPart[1].tokenValue;
+                        rightPart.RemoveAt(0);
+                    }
+
+                    if (rightPart[1].TokenType == Type.Variable && rightPart[0].name != "(")
+                    {
+                        variableFlag= true;
                         rightPart.RemoveAt(0);
                     }
                     else
@@ -208,6 +211,7 @@ namespace Compiler
                         if(rightPart[0].name != "(")
                         {
                             flag = true;
+                            globalOpenPar = rightPart[1];
                             rightPart.RemoveAt(0);
                         }
                         else
@@ -217,27 +221,70 @@ namespace Compiler
                         }
                     }
                 }
+                bool localFlag = false;
+                Token openParenthesis = null;
                 for (int j = 0; j < rightPart.Count; j++)
                 {
-                    if(rightPart[j].TokenType==Type.Variable || rightPart[j].TokenType==Type.Integer)
+                    if (rightPart[j].TokenType==Type.Variable || rightPart[j].TokenType==Type.Integer)
                     {
-                        foreach(var variable in variables)
+                        int? value=null;
+                        value = rightPart[j].tokenValue;
+                        foreach (var variable in variables)
                         {
                             if(rightPart[j].name == variable.name)
                             {
-                                rightPart[j] = variable;
+                                value = variable.tokenValue;
+                                if(variableFlag) value=-value;
+                                variableFlag= false;
                                 break;
                             }
                         }
-                        if(!rightPart[j].tokenValue.HasValue)
+                        if (!value.HasValue)
                         {
                             throw new MyException("Использование не инициализированной переменной",rightPart[j].line, rightPart[j].index);
                         }
-                        IntOrVariables.Push((int)rightPart[j].tokenValue);
+                        IntOrVariables.Push((int)value);
                         continue;
                     }
 
-                    if(rightPart[j].name=="(")
+                    #region минус перед значением
+                    if (j > 0)
+                    {
+                        if (rightPart[j].name == "-" && (rightPart[j - 1].name != ")" && rightPart[j-1].TokenType!=Type.Variable && rightPart[j-1].TokenType!=Type.Integer)
+                            && rightPart[j + 1].TokenType != Type.Operator && operators.Peek().name == "(")
+                        {
+                            rightPart[j + 1].tokenValue = -rightPart[j + 1].tokenValue;
+                            continue;
+                        }
+
+                        if (rightPart[j].name == "-" && operators.Count > 0 && operators.Peek().name == "(" && j + 1 < rightPart.Count && rightPart[j + 1].name == "("
+                        && rightPart[j-1].name!=")")
+                        {
+                            localFlag = true;
+                            openParenthesis = rightPart[j + 1];
+                            continue;
+                        }
+                    }
+                    else if(j==0)
+                    {
+                        if(rightPart[j].name == "-"  && rightPart[j + 1].TokenType != Type.Operator && operators.Peek().name == "(")
+                        {
+                            rightPart[j + 1].tokenValue = -rightPart[j + 1].tokenValue;
+                            continue;
+                        }
+                    }
+
+                    if (rightPart[j].name == "-" && operators.Count>0 && operators.Peek().name == "(" && j + 1 < rightPart.Count && rightPart[j + 1].name == "("
+                        && j==0)
+                    {
+                        localFlag = true;
+                        openParenthesis = rightPart[j + 1];
+                        continue;
+                    }
+                    #endregion
+
+
+                    if (rightPart[j].name=="(")
                     {
                         operators.Push(rightPart[j]);
                         continue;
@@ -282,7 +329,7 @@ namespace Compiler
 
                         if(rightPart[j].PriorityOfOperator<=oper.PriorityOfOperator)
                         {
-                            while(operators.Count!=0 || oper.name == "(")
+                            while(operators.Count!=0 && oper.name != "(")
                             {
                                 oper = operators.Pop();
                                 int SecondNumber = IntOrVariables.Pop();
@@ -308,6 +355,7 @@ namespace Compiler
                                         result = (int)Math.Pow(FirstNumber,SecondNumber);
                                         break;
                                 }
+                                if (operators.Count > 0) oper = operators.Peek();
                                 IntOrVariables.Push(result);
                             }
                             operators.Push(rightPart[j]);
@@ -398,18 +446,18 @@ namespace Compiler
                             }
                             oper = operators.Pop();
 
-                            if (flag)
+                            if (localFlag && oper.name=="(")
                             {
-                                bool hasOpen = false;
-                                foreach (Token token in operators)
+                                if(oper.index==openParenthesis.index)
                                 {
-                                    if (token.name == "(")
-                                    {
-                                        hasOpen = true;
-                                        break;
-                                    }
+                                    result = -result;
+                                    localFlag = false;
                                 }
-                                if(!hasOpen)
+                            }
+
+                            if(flag && oper.name=="(")
+                            {
+                                if(oper.index==globalOpenPar.index)
                                 {
                                     result = -result;
                                     flag = false;
@@ -418,7 +466,6 @@ namespace Compiler
 
                             IntOrVariables.Push(result);
                         }
-                        //oper = operators.Pop();
                     }
                 }
 
@@ -452,14 +499,14 @@ namespace Compiler
                     IntOrVariables.Push(result);
                 }
                 variables[i].tokenValue = IntOrVariables.Pop();
-                //int count=0;
+                /*if(flag)
+                {
+                    variables[i].tokenValue=-variables[i].tokenValue;
+                    flag = false;
+                }*/
                 for(int k=0;k<variables.Count;k++)
                 {
-                    /*if(variables[k].name == variables[i].name && i==k)
-                    {
-                        variables[k] = variables[i];
-                        break;
-                    }*/
+
                     if(variables[k].name == variables[i].name && variables[k].tokenValue != variables[i].tokenValue && i != k)
                     {
                         //попробовать связать с позицией (i = k)
@@ -470,8 +517,6 @@ namespace Compiler
                         break;
                     }
                 }
-                //operators = new Stack<Token>();
-                //IntOrVariables = new Stack<int>();
                 IntOrVariables.Clear();
             }
         }

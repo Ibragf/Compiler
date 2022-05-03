@@ -27,7 +27,7 @@ namespace Compiler
             "Real",
             "Integer"
         };
-        string[] lines;
+        public string[] lines { get; private set; }
         bool hasBeginBorder=false;
         bool hasEndBorder = false;
         public string text { get; private set; }

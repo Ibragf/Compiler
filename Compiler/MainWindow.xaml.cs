@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,24 +21,23 @@ namespace Compiler
     /// </summary>
     public partial class MainWindow : Window
     {
+        string formula_text;
         public MainWindow()
         {
             InitializeComponent();
+            uploadFormula();
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            //string example=InputTextBox.Text;
-            //int line = InputTextBox.GetLineIndexFromCharacterIndex(InputTextBox.CaretIndex)+1;
-            //string position=InputTextBox.CaretIndex.ToString();
-            //OutputText.Text = position+"   "+InputTextBox.Text.Length+"   "+line.ToString()+"  "+InputTextBox.LineCount;
-
+            string[] lines = null;
             try
             {
                 OutputText.Text=String.Empty;
-                OutputText.Foreground = new SolidColorBrush(Color.FromRgb(223,217,190));
+                OutputText.Foreground = Brushes.Black;
 
                 Tokenizer tokenizer = new Tokenizer(InputTextBox.Text);
+                lines = tokenizer.lines;
                 AnalyzerOfTokens analyzer = new AnalyzerOfTokens(tokenizer);
                 Generator generator = new Generator(analyzer);
 
@@ -53,22 +53,30 @@ namespace Compiler
                         outText += variable.name + " = " + variable.tokenValue + "\n";
                     }
                 }
-                //OutputText.Text = tokenizer.text;
                 OutputText.Text += outText;
             }
             catch (MyException ex)
             {
                 OutputText.Foreground = Brushes.Red;
                 OutputText.Text=ex.Message+"\n"+"Строка: "+$"{ex.line}\n"+"Слово: "+$"{ex.index}\n";
-                string text = InputTextBox.GetLineText(ex.line-1);
-                text=text.Replace("\r\n", String.Empty);
-                OutputText.Text += "["+text+"]";
+                string ErrorText = lines[ex.line - 1];
+                string[] words = ErrorText.Split(' ');
+                words[ex.index - 1] = "{"+words[ex.index-1]+"}";
+                StringBuilder builder=new StringBuilder();
 
-            }
-            catch (Exception ex)
-            {
-                OutputText.Foreground = Brushes.Red;
-                OutputText.Text = ex.Message+"\n"+"Сторонняя ошибка";
+                for (int i=0;i<words.Length;i++)
+                {
+                    builder.Append($"{words[i]} ");
+                }
+
+                builder.Replace("\r\n", String.Empty);
+                string text= "["+ builder.ToString()+"]";
+                int index=text.IndexOf("{");
+                string scape = new string(' ', index+words[ex.index-1].Length/2);
+                scape += "↑";
+                text += "\n" + scape;
+                OutputText.Text+=text;
+
             }
         }
 
@@ -96,6 +104,16 @@ namespace Compiler
         {
             var textToSync = (sender == LineNumber) ? InputTextBox : LineNumber;
             textToSync.ScrollToVerticalOffset(e.VerticalOffset);
+        }
+
+        public async void uploadFormula()
+        {
+            using (FileStream fstream = File.OpenRead("formula.txt"))
+            {
+                byte[] buffer = new byte[fstream.Length];
+                await fstream.ReadAsync(buffer,0, buffer.Length);
+                formula.Text=Encoding.UTF8.GetString(buffer);
+            }
         }
 
     }
