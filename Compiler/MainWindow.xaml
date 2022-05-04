@@ -85,8 +85,14 @@
                      ScrollViewer.ScrollChanged="LineNumber_ScrollChanged"/>
         </Grid>
         <Grid Grid.Column="1">
-            <TextBox x:Name="InputTextBox" Style="{StaticResource TextBox}" Padding="5,0,0,0" TextChanged="InputTextBox_TextChanged"
-                     ScrollViewer.ScrollChanged="LineNumber_ScrollChanged" />
+            <RichTextBox x:Name="InputText" ScrollViewer.ScrollChanged="LineNumber_ScrollChanged" TextChanged="InputTextBox_TextChanged"
+                          Padding="5,0,0,0" >
+                <FlowDocument LineHeight="0.01" FontFamily="Cascadia Mono" FontSize="13">
+                    <Paragraph>
+                        
+                    </Paragraph>
+                </FlowDocument>
+            </RichTextBox>
         </Grid>
         <Grid Grid.Column="2">
             <Grid.RowDefinitions>

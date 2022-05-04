@@ -132,18 +132,18 @@ namespace Compiler
                     {
                         if (j == expression.Count-1 && expression[j].name != ")") {
 
-                            throw new MyException("После оператора должны быть переменная или целое число", expression[j].line, expression[j].index);
+                            throw new MyException("Выражение не может заканчиваться оператором", expression[j].line, expression[j].index);
                         }
                         //if(j+1>=expression.Count) throw new MyException("После оператора должны быть переменная или целое число", expression[j].line, expression[j].index);
                         if(j + 1 < expression.Count)
                         {
                             if(expression[j].name=="-" && expression[j+1].name!="(")
                             {
-                                throw new MyException("После оператора должны быть переменная или целое число", expression[j].line, expression[j].index);
+                                throw new MyException("Два оператора подряд", expression[j].line, expression[j].index);
                             }
 
                             if (expression[j].name == "(" && expression[j + 1].TokenType == Type.Operator && expression[j + 1].name != "(" && expression[j + 1].name != "-")
-                                throw new MyException("После оператора должны быть переменная или целое число", expression[j].line, expression[j].index);
+                                throw new MyException("Два оператора подряд", expression[j].line, expression[j].index);
                             /*if (expression[j].name == ")" && expression[j + 1].TokenType == Type.Variable && expression[j + 1].name != ")")
                                 throw new MyException("После оператора должны быть переменная или целое число", expression[j].line, expression[j].index);
                             */
@@ -155,18 +155,23 @@ namespace Compiler
                             if((expression[j+1].TokenType==Type.Operator && expression[j+1].name!="(" && expression[j+1].name!="^" && expression[j].name != ")") &&
                                 !(expression[j].name=="(" && expression[j+1].name=="-"))
                             {
-                                throw new MyException("После оператора должны быть переменная или целое число1", expression[j].line, expression[j].index);
+                                throw new MyException("Два оператора подряд", expression[j].line, expression[j].index);
+                            }
+
+                            if(expression[j].name!=")" && expression[j+1].name == "^")
+                            {
+                                throw new MyException("Два оператора подряд", expression[j].line, expression[j].index);
                             }
 
                             if (expression[j].name == ")" && (expression[j + 1].TokenType != Type.Operator || expression[j + 1].name == "("))
                             {
-                                throw new MyException("После оператора должeн быть оператор(не \"(\")", expression[j].line, expression[j].index);
+                                throw new MyException("После скобки должен быть арифмитический оператор", expression[j].line, expression[j].index);
                             }
                         }
                     }
                     if (j + 1 < expression.Count && expression[j].name == ")" && expression[j + 1].TokenType != Type.Operator)
                     {
-                        throw new MyException("После оператора должeн быть оператор", expression[j].line, expression[j].index);
+                        throw new MyException("После скобки должен быть арифмитический оператор", expression[j].line, expression[j].index);
                     }
                     /*if(expression[j-1].name!="=" && expression[j-1].TokenType==Type.Operator && expression[j].TokenType == Type.Operator)
                     {

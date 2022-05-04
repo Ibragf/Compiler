@@ -252,7 +252,7 @@ namespace Compiler
                     }
                 }
                 isIntegerOrVar = Int32.TryParse(token.name[0].ToString(), out example);
-                if (isIntegerOrVar) throw new MyException("Первый символ не буква", token.line, token.index);
+                if (isIntegerOrVar) throw new MyException("Первый символ переменной не буква", token.line, token.index);
                 if (!isIntegerOrVar)
                 {
                     token.TokenType = Type.Variable;

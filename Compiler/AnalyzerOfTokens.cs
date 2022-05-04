@@ -118,7 +118,7 @@ namespace Compiler
                             defination.RemoveAt(defination.Count-1);
                             if (defination.Count == 1)
                             {
-                                throw new MyException($"Определение Real не содержит\n переменной", tokens[i].line, tokens[i].index);
+                                throw new MyException($"Определение Real не содержит\n переменной", tokens[i].line-1, tokens[i].index);
                             }
                             Definations.Add(defination);
                             dicrement = true;
