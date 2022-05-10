@@ -46,7 +46,9 @@ namespace Compiler
                 if (ErrorSymbol != null) ErrorSymbol.Foreground = Brushes.Black;
 
                 Tokenizer tokenizer = new Tokenizer(text);
+                tokenizer.Replacement();
                 lines = tokenizer.lines;
+                tokenizer.DevideIntoTokens();
                 AnalyzerOfTokens analyzer = new AnalyzerOfTokens(tokenizer);
                 Generator generator = new Generator(analyzer);
 
@@ -70,7 +72,7 @@ namespace Compiler
                 OutputText.Text=ex.Message+"\n"+"Строка: "+$"{ex.line}";
                 string ErrorText = lines[ex.line - 1];
                 string[] words = ErrorText.Split(' ');
-                words[ex.index - 1] = words[ex.index-1];
+                //words[ex.index - 1] = words[ex.index-1];
                 StringBuilder builder=new StringBuilder();
 
                 for (int i=0;i<words.Length;i++)
@@ -96,21 +98,21 @@ namespace Compiler
                 {
                     if(i==ex.index-1)
                     {
-                        ErrorSymbol.Text=words[i];
+                        ErrorSymbol.Text=words[i]+" ";
                         firstPart.Text=changeText.ToString();
                         changeText.Clear();
                         for (int j=i+1;j<words.Length;j++)
                         {
-                            changeText.Append(words[j]);
-                        }
+                            changeText.Append(words[j]+" ");
+                        } 
                         changeText.Append('\n');
                         break;
                     }
-                    changeText.Append(words[i]);
+                    changeText.Append(words[i]+" ");
                 }
                 for (int i=ex.line;  i< lines.Length; i++)
                 {
-                    if(i==lines.Length-1)
+                    if(i==lines.Length-2)
                     {
                         changeText.Append(lines[i]);
                         break;

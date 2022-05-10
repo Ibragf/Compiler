@@ -30,8 +30,8 @@ namespace Compiler
             {
                 CheckDefinations();
                 isParenthesesBalanced();
-                CheckRightPart();
                 SeparatorOfExpressions();
+                CheckRightPart();
                 Calculate();
             }
         }
@@ -47,6 +47,11 @@ namespace Compiler
             if(Definations.Count==0)
             {
                 throw new MyException("Отсутствует определение в программе", 1,1);
+            }
+            if(Expressions.Count==0)
+            {
+                Token defination = Definations.Last().Last();
+                throw new MyException("Отсутствует оператор в программе", defination.line, defination.index);
             }
         }
 
@@ -70,7 +75,7 @@ namespace Compiler
                     else if (!parentheses.ContainsValue(token.name)) continue;
                     else if(stack.Count == 0)
                     {
-                        throw new MyException("Нет открывающей скобки для закрывающей",token.line,token.index);
+                        throw new MyException("Нарушен баланс скобок.\nНет открывающей скобки для закрывающей",token.line,token.index);
                     }
                     else
                     {
@@ -88,7 +93,7 @@ namespace Compiler
                 if (stack.Count > 0)
                 {
                     Token token = stack.Pop();
-                    throw new MyException("Нет закрывающей скобки для открывающей", token.line, token.index);
+                    throw new MyException("Нарушен баланс скобок.\nНет закрывающей скобки для открывающей", token.line, token.index);
                 }
             }
         }
@@ -114,13 +119,28 @@ namespace Compiler
                 List<Token> expression = Expressions[i];
 
                 int j = 0;
+                int count = 0;
                 while (expression[j].name != "=")
                 {
+                    if (expression[j].TokenType!=Type.Mark && expression[j].TokenType!=Type.Variable)
+                    {
+                        throw new MyException($"Левая часть оператора не может содержать {expression[j].nameOfType()}",expression[j].line,expression[j].index) ;
+                    }
                     if (expression[j].TokenType == Type.Variable)
                     {
+                        count++;
                         variables.Add(expression[j]);
                     }
+                    if (count > 1)
+                    {
+                        Token t = expression.First(x => x.TokenType == Type.Variable);
+                        throw new MyException($"После переменной должен быть знак \"=\"", t.line, t.index);
+                    }
                     j++;
+                }
+                if (count == 0)
+                {
+                    throw new MyException($"Левая часть оператора не содержит переменной", expression[j].line, expression[j].index);
                 }
 
                 j++;
@@ -132,18 +152,18 @@ namespace Compiler
                     {
                         if (j == expression.Count-1 && expression[j].name != ")") {
 
-                            throw new MyException("Выражение не может заканчиваться оператором", expression[j].line, expression[j].index);
+                            throw new MyException("Выражение не может заканчиваться математической операцией", expression[j].line, expression[j].index);
                         }
                         //if(j+1>=expression.Count) throw new MyException("После оператора должны быть переменная или целое число", expression[j].line, expression[j].index);
                         if(j + 1 < expression.Count)
                         {
                             if(expression[j].name=="-" && expression[j+1].name!="(")
                             {
-                                throw new MyException("Два оператора подряд", expression[j].line, expression[j].index);
+                                throw new MyException("Две математические операции подряд", expression[j].line, expression[j].index);
                             }
 
                             if (expression[j].name == "(" && expression[j + 1].TokenType == Type.Operator && expression[j + 1].name != "(" && expression[j + 1].name != "-")
-                                throw new MyException("Два оператора подряд", expression[j].line, expression[j].index);
+                                throw new MyException("Две математические операции подряд", expression[j].line, expression[j].index);
                             /*if (expression[j].name == ")" && expression[j + 1].TokenType == Type.Variable && expression[j + 1].name != ")")
                                 throw new MyException("После оператора должны быть переменная или целое число", expression[j].line, expression[j].index);
                             */
@@ -155,23 +175,23 @@ namespace Compiler
                             if((expression[j+1].TokenType==Type.Operator && expression[j+1].name!="(" && expression[j+1].name!="^" && expression[j].name != ")") &&
                                 !(expression[j].name=="(" && expression[j+1].name=="-"))
                             {
-                                throw new MyException("Два оператора подряд", expression[j].line, expression[j].index);
+                                throw new MyException("Две математические операции подряд", expression[j].line, expression[j].index);
                             }
 
                             if(expression[j].name!=")" && expression[j+1].name == "^")
                             {
-                                throw new MyException("Два оператора подряд", expression[j].line, expression[j].index);
+                                throw new MyException("Две математические операции подряд", expression[j].line, expression[j].index);
                             }
 
                             if (expression[j].name == ")" && (expression[j + 1].TokenType != Type.Operator || expression[j + 1].name == "("))
                             {
-                                throw new MyException("После скобки должен быть арифмитический оператор", expression[j].line, expression[j].index);
+                                throw new MyException("После скобки должна быть математическая операция", expression[j].line, expression[j].index);
                             }
                         }
                     }
                     if (j + 1 < expression.Count && expression[j].name == ")" && expression[j + 1].TokenType != Type.Operator)
                     {
-                        throw new MyException("После скобки должен быть арифмитический оператор", expression[j].line, expression[j].index);
+                        throw new MyException("После скобки должна быть математическая операция", expression[j].line, expression[j].index);
                     }
                     /*if(expression[j-1].name!="=" && expression[j-1].TokenType==Type.Operator && expression[j].TokenType == Type.Operator)
                     {
@@ -198,20 +218,21 @@ namespace Compiler
                 if (rightPart[0].TokenType ==Type.Operator  && operators.Count == 0)
                 {
                     if(rightPart[0].name !="-" && rightPart[0].name != "(")
-                        throw new MyException("Перед оператором должны быть переменная или целое число",rightPart[0].line, rightPart[0].index);
-
+                        throw new MyException("Перед математической операцией должны быть переменная или целое число",rightPart[0].line, rightPart[0].index);
+                    bool isChanged=false;
                     if(rightPart[1].TokenType ==Type.Integer && rightPart[0].name!="(")
                     {
                         rightPart[1].tokenValue = -rightPart[1].tokenValue;
                         rightPart.RemoveAt(0);
+                        isChanged=true;
                     }
 
-                    if (rightPart[1].TokenType == Type.Variable && rightPart[0].name != "(")
+                    if (rightPart.Count>1 && rightPart[1].TokenType == Type.Variable && rightPart[0].name != "(")
                     {
                         variableFlag= true;
                         rightPart.RemoveAt(0);
                     }
-                    else
+                    else if(!isChanged)
                     {
                         if(rightPart[0].name != "(")
                         {

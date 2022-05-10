@@ -37,9 +37,12 @@ namespace Compiler
         {
             this.text = text;
             tokens = new List<Token>();
+        }
+
+        public void DevideIntoTokens()
+        {
             if (text != String.Empty && text != null)
             {
-                Replacement();
                 TokenSeparator();
                 SettingType();
                 JoinLines();
@@ -57,7 +60,7 @@ namespace Compiler
 
 
         //приведение в читаемую форму для разделения на токены
-        private void Replacement()
+        public void Replacement()
         {
             text = text.Replace("\r", String.Empty);
             text = text.Replace("\t", String.Empty);

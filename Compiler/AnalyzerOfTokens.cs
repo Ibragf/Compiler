@@ -70,6 +70,12 @@ namespace Compiler
                                 defination.Add(tokens[j]);
                                 continue;
                             }
+
+                            if (defination.Count == 1)
+                            {
+                                string VarOrInt = (tokens[i].name == "Real") ? "переменной" : "целое число";
+                                throw new MyException($"Определение {tokens[i].name} не содержит\n{VarOrInt}", tokens[i].line, tokens[i].index);
+                            }
                             /*if(defination.Count == 1)
                             {
                                 throw new MyException("Определение Real",tokens[i].line,tokens[i].index);
@@ -78,7 +84,7 @@ namespace Compiler
                             if (tokens[j].name!="=" && tokens[j].TokenType!=Type.Mark && tokens[j].TokenType!=Type.Keyword && tokens[j].TokenType != Type.EndBorder)
                             {
                                 //ошибка : не пер и не метка или не оператор
-                                throw new MyException("После определения Real должно быть:\nметка или\nключевое слово или\nпеременная или\nEnd", tokens[j].line, tokens[j].index);
+                                throw new MyException($"После определения Real не должно быть {tokens[j].nameOfType()}", tokens[j].line, tokens[j].index);
                             }
                         }
                         if(tokens[i].name=="Integer")
@@ -89,18 +95,18 @@ namespace Compiler
                                 continue;
                             }
 
+                            if (defination.Count == 1)
+                            {
+                                string VarOrInt = (tokens[i].name == "Real") ? "переменной" : "целое число";
+                                throw new MyException($"Определение {tokens[i].name} не содержит\n{VarOrInt}", tokens[i].line, tokens[i].index);
+                            }
+
                             if (tokens[j].TokenType != Type.Mark && tokens[j].TokenType != Type.Keyword && tokens[j].TokenType != Type.Variable &&
                                     /*(tokens[j].TokenType == Type.Variable && tokens[j+1].name != "=") &&*/ tokens[j].TokenType != Type.EndBorder)
                             {
                                 //ошибка : не пер и не метка или не оператор
-                                throw new MyException("После определения Integer должно быть:\nметка или\nключевое слово или\nпеременная или\nEnd ", tokens[j].line, tokens[j].index);
+                                throw new MyException($"После определения Integer не должно быть {tokens[j].nameOfType()}", tokens[j].line, tokens[j].index); 
                             }
-                        }
-
-                        if(defination.Count==1)
-                        {
-                            string VarOrInt = (tokens[i].name == "Real") ? "переменной" : "целое число";
-                            throw new MyException($"Определение {tokens[i].name} не содержит\n{VarOrInt}",tokens[i].line,tokens[i].index);
                         }
 
                         if(tokens[j].TokenType==Type.Mark || tokens[j].TokenType==Type.Keyword || tokens[j].TokenType == Type.EndBorder)
@@ -148,10 +154,24 @@ namespace Compiler
                     {
                         if (tokens[j].TokenType==Type.Variable || tokens[j].TokenType==Type.Operator || tokens[j].TokenType == Type.Integer)
                         {
+                            if (hasEqualOper && j - 1 > -1 && tokens[j - 1].TokenType != Type.Operator && tokens[j].TokenType == Type.Integer)
+                            {
+                                throw new MyException("Перед целым числом нет знака математиечской операции", tokens[j].line, tokens[j].index);
+                            }
+                            if (hasEqualOper && j-1>-1 && tokens[j-1].TokenType!=Type.Operator && tokens[j].TokenType!=Type.Operator)
+                            {
+                                arithmeticExpressions.Add(expression);
+                                break;
+                            }
+
                             if (tokens[j].name == "=" && hasEqualOper)
                             {
                                 i = j - 1;
                                 dicrement = true;
+                                if (expression[expression.Count-1].TokenType != Type.Variable)
+                                {
+                                    throw new MyException("Перед \"=\" должна быть переменная", tokens[j].line, tokens[j].index);
+                                }
                                 expression.RemoveAt(expression.Count - 1);
                                 arithmeticExpressions.Add(expression);
                                 expression = null;
@@ -172,7 +192,7 @@ namespace Compiler
                         if(tokens[j].TokenType!=Type.Mark && tokens[j].TokenType!=Type.EndBorder)
                         {
                             // ошибка :  не метка и не End
-                            throw new MyException("После ариф.выражения стоит неверное слово",tokens[j].line,tokens[j].index);
+                            throw new MyException("После оператора стоит неверное слово",tokens[j].line,tokens[j].index);
                         }
 
                         if(tokens[j].TokenType==Type.Mark || tokens[j].TokenType == Type.EndBorder)
