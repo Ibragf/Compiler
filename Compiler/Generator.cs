@@ -88,7 +88,13 @@ namespace Compiler
                 }
                 if(!hasEqualOperator)
                 {
-                    throw new MyException("После переменной должен быть знак \"=\"",expression[0].line,expression[0].index);
+                    if (expression[0].TokenType == Type.Mark && 1 >= expression.Count) 
+                        throw new MyException("После метки должна быть переменная", expression[0].line, expression[0].index);
+                    if (expression[0].TokenType == Type.Mark && 1 < expression.Count && expression[1].TokenType != Type.Variable)
+                        throw new MyException("После метки должна быть переменная", expression[0].line, expression[0].index);
+                    if(expression[0].TokenType == Type.Mark && 1<expression.Count && expression[1].TokenType==Type.Variable)
+                        throw new MyException("После переменной должен быть знак \"=\"",expression[1].line,expression[1].index);
+                    throw new MyException("После переменной должен быть знак \"=\"", expression[0].line, expression[0].index);
                 }
                 if (stack.Count > 0)
                 {
@@ -107,7 +113,7 @@ namespace Compiler
                 if (expression[0].TokenType == Type.Mark) j = 3;
                 if (j>=expression.Count)
                 {
-                    throw new MyException("Нет правой части", expression[1].line, expression[i].index);
+                    throw new MyException("Нет правой части", expression[1].line, expression[expression.Count-1].index);
                 }
             }
         }
