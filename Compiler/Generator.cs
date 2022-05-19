@@ -29,8 +29,8 @@ namespace Compiler
             if (Definations != null && Expressions != null)
             {
                 CheckDefinations();
-                isParenthesesBalanced();
                 SeparatorOfExpressions();
+                isParenthesesBalanced();
                 CheckRightPart();
                 Calculate();
             }
