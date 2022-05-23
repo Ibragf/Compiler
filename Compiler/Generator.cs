@@ -29,8 +29,8 @@ namespace Compiler
             if (Definations != null && Expressions != null)
             {
                 CheckDefinations();
-                SeparatorOfExpressions();
                 isParenthesesBalanced();
+                SeparatorOfExpressions();
                 CheckRightPart();
                 Calculate();
             }
@@ -75,7 +75,7 @@ namespace Compiler
                     else if (!parentheses.ContainsValue(token.name)) continue;
                     else if(stack.Count == 0)
                     {
-                        throw new MyException("Нарушен баланс скобок.\nНет открывающей скобки для закрывающей",token.line,token.index);
+                        throw new MyException("Нарушен баланс скобок.\nСлишком много закрывающих скобок",token.line,token.index);
                     }
                     else
                     {
@@ -99,7 +99,7 @@ namespace Compiler
                 if (stack.Count > 0)
                 {
                     Token token = stack.Pop();
-                    throw new MyException("Нарушен баланс скобок.\nНет закрывающей скобки для открывающей", token.line, token.index);
+                    throw new MyException("Нарушен баланс скобок.\nСлишком много открывающих скобок", token.line, token.index);
                 }
             }
         }
@@ -163,13 +163,23 @@ namespace Compiler
                         //if(j+1>=expression.Count) throw new MyException("После оператора должны быть переменная или целое число", expression[j].line, expression[j].index);
                         if(j + 1 < expression.Count)
                         {
-                            if(expression[j].name=="-" && expression[j+1].name!="(")
+                            if (expression[j].name == "-" && expression[j + 1].name == ")")
+                            {
+                                throw new MyException("После математической операции не может идти закрывающая скобка", expression[j].line, expression[j].index);
+                            }
+
+                            if (expression[j].name=="-" && expression[j+1].name!="(")
                             {
                                 throw new MyException("Две математические операции подряд", expression[j].line, expression[j].index);
                             }
 
+                            if(expression[j].name!="-" && expression[j].name!=")" && expression[j+1].name==")")
+                            {
+                                throw new MyException("После математической операции не может идти закрывающая скобка", expression[j].line, expression[j].index);
+                            }
+
                             if (expression[j].name == "(" && expression[j + 1].TokenType == Type.Operator && expression[j + 1].name != "(" && expression[j + 1].name != "-")
-                                throw new MyException("Две математические операции подряд", expression[j].line, expression[j].index);
+                                throw new MyException($"После открывающей скобки не может стоять знак \"{expression[j+1].name}\"", expression[j].line, expression[j].index);
                             /*if (expression[j].name == ")" && expression[j + 1].TokenType == Type.Variable && expression[j + 1].name != ")")
                                 throw new MyException("После оператора должны быть переменная или целое число", expression[j].line, expression[j].index);
                             */
@@ -191,13 +201,13 @@ namespace Compiler
 
                             if (expression[j].name == ")" && (expression[j + 1].TokenType != Type.Operator || expression[j + 1].name == "("))
                             {
-                                throw new MyException("После скобки должна быть математическая операция", expression[j].line, expression[j].index);
+                                throw new MyException("После закрывающей скобки должна быть математическая операция", expression[j].line, expression[j].index);
                             }
                         }
                     }
                     if (j + 1 < expression.Count && expression[j].name == ")" && expression[j + 1].TokenType != Type.Operator)
                     {
-                        throw new MyException("После скобки должна быть математическая операция", expression[j].line, expression[j].index);
+                        throw new MyException("После закрывающей скобки должна быть математическая операция", expression[j].line, expression[j].index);
                     }
                     /*if(expression[j-1].name!="=" && expression[j-1].TokenType==Type.Operator && expression[j].TokenType == Type.Operator)
                     {
@@ -530,12 +540,18 @@ namespace Compiler
                     }
                     IntOrVariables.Push(result);
                 }
+                if(IntOrVariables.Count>1)
+                {
+                    int SecondNumber = IntOrVariables.Pop();
+                    int FirstNumber = IntOrVariables.Pop();
+                    IntOrVariables.Push(SecondNumber + FirstNumber);
+                }
                 variables[i].tokenValue = IntOrVariables.Pop();
-                /*if(flag)
+                if(flag)
                 {
                     variables[i].tokenValue=-variables[i].tokenValue;
                     flag = false;
-                }*/
+                }
                 for(int k=0;k<variables.Count;k++)
                 {
 

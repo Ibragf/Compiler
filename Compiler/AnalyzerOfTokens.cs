@@ -56,7 +56,7 @@ namespace Compiler
                     bool wasAdd = false;
                     while(i<tokens.Count && tokens[i].TokenType!=Type.Keyword && tokens[i].name!="="&&tokens[i].TokenType!=Type.Mark)
                     {
-                        if (tokens[i].TokenType != Type.Variable) throw new MyException($"После Real не может идти {tokens[i].nameOfType()}",tokens[i].line,tokens[i].index);
+                        if (tokens[i].TokenType != Type.Variable) throw new MyException($"Определение Real не может содержать {tokens[i].nameOfType()}",tokens[i].line,tokens[i].index);
 
                         defination.Add(tokens[i]);
 
@@ -92,7 +92,7 @@ namespace Compiler
 
                     while (i<tokens.Count && tokens[i].TokenType!=Type.Keyword&&tokens[i].TokenType!=Type.Mark&&tokens[i].TokenType!=Type.Variable)
                     {
-                        if (tokens[i].TokenType != Type.Integer) throw new MyException($"После Integer не может идти {tokens[i].nameOfType()}", tokens[i].line, tokens[i].index);
+                        if (tokens[i].TokenType != Type.Integer) throw new MyException($"Определение Integer не может содержать {tokens[i].nameOfType()}", tokens[i].line, tokens[i].index);
 
                         defination.Add(tokens[i]);
                         i++;
@@ -161,6 +161,8 @@ namespace Compiler
 
                 if(tokens[i].TokenType!=Type.BeginBorder && tokens[i].TokenType!=Type.EndBorder)
                 {
+                    if(i-1>=0 && tokens.Count>0)
+                        throw new MyException($"После {tokens[i-1].name} не может идти {tokens[i].nameOfType()}", tokens[i].line, tokens[i].index);
                     throw new MyException($"Неверное использование {tokens[i].nameOfType()}", tokens[i].line, tokens[i].index);
                 }
                 i++;
