@@ -378,25 +378,7 @@ namespace Compiler
                                 int FirstNumber = IntOrVariables.Pop();
                                 int result = 0;
 
-                                switch (oper.name)
-                                {
-                                    case "+":
-                                        result = FirstNumber + SecondNumber;
-                                        break;
-                                    case "-":
-                                        result = FirstNumber - SecondNumber;
-                                        break;
-                                    case "*":
-                                        result = FirstNumber * SecondNumber;
-                                        break;
-                                    case "/":
-                                        if (SecondNumber == 0) throw new MyException("Попытка деления на 0", oper.line, oper.index + 1);
-                                        result = FirstNumber / SecondNumber;
-                                        break;
-                                    case "^":
-                                        result = (int)Math.Pow(FirstNumber,SecondNumber);
-                                        break;
-                                }
+                                operation(oper, FirstNumber, SecondNumber, ref result);
                                 if (operators.Count > 0) oper = operators.Peek();
                                 IntOrVariables.Push(result);
                             }
@@ -430,25 +412,7 @@ namespace Compiler
                                 int FirstNumber = IntOrVariables.Pop();
                                 int result = 0;
 
-                                switch (oper.name)
-                                {
-                                    case "+":
-                                        result = FirstNumber + SecondNumber;
-                                        break;
-                                    case "-":
-                                        result = FirstNumber - SecondNumber;
-                                        break;
-                                    case "*":
-                                        result = FirstNumber * SecondNumber;
-                                        break;
-                                    case "/":
-                                        if (SecondNumber == 0) throw new MyException("Попытка деления на 0", oper.line, oper.index + 1);
-                                        result = FirstNumber / SecondNumber;
-                                        break;
-                                    case "^":
-                                        result = (int)Math.Pow(FirstNumber, SecondNumber);
-                                        break;
-                                }
+                                operation(oper, FirstNumber, SecondNumber, ref result);
                                 IntOrVariables.Push(result);
                             }
                             operators.Push(rightPart[j]);
@@ -467,25 +431,7 @@ namespace Compiler
                             int FirstNumber = IntOrVariables.Pop();
                             int result = 0;
 
-                            switch (oper.name)
-                            {
-                                case "+":
-                                    result = FirstNumber + SecondNumber;
-                                    break;
-                                case "-":
-                                    result = FirstNumber - SecondNumber;
-                                    break;
-                                case "*":
-                                    result = FirstNumber * SecondNumber;
-                                    break;
-                                case "/":
-                                    if (SecondNumber == 0) throw new MyException("Попытка деления на 0", oper.line, oper.index + 1);
-                                    result = FirstNumber / SecondNumber;
-                                    break;
-                                case "^":
-                                    result = (int)Math.Pow(FirstNumber, SecondNumber);
-                                    break;
-                            }
+                            operation(oper, FirstNumber, SecondNumber, ref result);
                             oper = operators.Pop();
 
                             if (localFlag && oper.name=="(")
@@ -519,25 +465,7 @@ namespace Compiler
                     int FirstNumber = IntOrVariables.Pop();
                     int result = 0;
 
-                    switch (oper.name)
-                    {
-                        case "+":
-                            result = FirstNumber + SecondNumber;
-                            break;
-                        case "-":
-                            result = FirstNumber - SecondNumber;
-                            break;
-                        case "*":
-                            result = FirstNumber * SecondNumber;
-                            break;
-                        case "/":
-                            if (SecondNumber == 0) throw new MyException("Попытка деления на 0", oper.line, oper.index + 1);
-                            result = FirstNumber / SecondNumber;
-                            break;
-                        case "^":
-                            result = (int)Math.Pow(FirstNumber, SecondNumber);
-                            break;
-                    }
+                    operation(oper, FirstNumber, SecondNumber, ref result);
                     IntOrVariables.Push(result);
                 }
                 if(IntOrVariables.Count>1)
@@ -567,6 +495,31 @@ namespace Compiler
                 }
                 IntOrVariables.Clear();
             }
+        }
+
+        private void operation(Token oper, int FirstNumber, int SecondNumber, ref int result)
+        {
+            switch (oper.name)
+            {
+                case "+":
+                    result = FirstNumber + SecondNumber;
+                    break;
+                case "-":
+                    result = FirstNumber - SecondNumber;
+                    break;
+                case "*":
+                    result = FirstNumber * SecondNumber;
+                    break;
+                case "/":
+                    if (SecondNumber == 0) throw new MyException("Попытка деления на 0", oper.line, oper.index + 1);
+                    result = FirstNumber / SecondNumber;
+                    break;
+                case "^":
+                    result = (int)Math.Pow(FirstNumber, SecondNumber);
+                    break;
+            }
+            if (result == Int32.MaxValue) result = result+ 1000000;
+            if (result == Int32.MinValue) result = result-1000000;
         }
     }
 }
