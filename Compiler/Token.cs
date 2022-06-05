@@ -12,7 +12,7 @@ namespace Compiler
         public readonly int index;
         private Type tokenType;
         public readonly string name;
-        public int? tokenValue=null;
+        public long? tokenValue=null;
         private int? priorityOfOperator = null;
 
 

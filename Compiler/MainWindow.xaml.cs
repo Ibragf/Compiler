@@ -77,7 +77,7 @@ namespace Compiler
 
                 for (int i=0;i<words.Length;i++)
                 {
-                    builder.Append($"{words[i]} ");
+                    builder.Append($"{words[i]}");
                 }
 
                 firstPart=new Run();
@@ -98,17 +98,17 @@ namespace Compiler
                 {
                     if(i==ex.index-1)
                     {
-                        ErrorSymbol.Text=words[i]+" ";
+                        ErrorSymbol.Text=words[i];
                         firstPart.Text=changeText.ToString();
                         changeText.Clear();
                         for (int j=i+1;j<words.Length;j++)
                         {
-                            changeText.Append(words[j]+" ");
+                            changeText.Append(words[j]);
                         } 
                         changeText.Append('\n');
                         break;
                     }
-                    changeText.Append(words[i]+" ");
+                    changeText.Append(words[i]);
                 }
                 for (int i=ex.line;  i< lines.Length; i++)
                 {
@@ -119,7 +119,7 @@ namespace Compiler
                     }
                     changeText.Append(lines[i]+"\n");
                 }
-                secondPart.Text=changeText.ToString();
+                secondPart.Text=changeText.ToString().Replace(" ", String.Empty);
 
                 Paragraph paragraph=new Paragraph();
                 InputText.Document.Blocks.Clear();

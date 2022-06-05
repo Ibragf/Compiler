@@ -153,13 +153,18 @@ namespace Compiler
                 List<Token> rightPart = new List<Token>();
                 while (j < expression.Count)
                 {
-                    if(expression[j].TokenType==Type.Operator && (j+1>=expression.Count ||
+                    if (j - 1 > -1 && expression[j - 1].name != "=" && expression[j].name == "(" && expression[j - 1].TokenType != Type.Operator)
+                    {
+                        throw new MyException($"После {expression[j - 1].nameOfType()} не может идти открывающая скобка", expression[j - 1].line, expression[j - 1].index);
+                    }
+                    if (expression[j].TokenType==Type.Operator && (j+1>=expression.Count ||
                         (expression[j+1].TokenType!=Type.Variable && expression[j+1].TokenType != Type.Integer)))
                     {
                         if (j == expression.Count-1 && expression[j].name != ")") {
 
                             throw new MyException("Выражение не может заканчиваться математической операцией", expression[j].line, expression[j].index);
                         }
+
                         //if(j+1>=expression.Count) throw new MyException("После оператора должны быть переменная или целое число", expression[j].line, expression[j].index);
                         if(j + 1 < expression.Count)
                         {
@@ -269,7 +274,7 @@ namespace Compiler
                 {
                     if (rightPart[j].TokenType==Type.Variable || rightPart[j].TokenType==Type.Integer)
                     {
-                        int? value=null;
+                        long? value=null;
                         value = rightPart[j].tokenValue;
                         foreach (var variable in variables)
                         {
@@ -300,7 +305,7 @@ namespace Compiler
                         }
 
                         if (rightPart[j].name == "-" && operators.Count > 0 && operators.Peek().name == "(" && j + 1 < rightPart.Count && rightPart[j + 1].name == "("
-                        && rightPart[j-1].name!=")")
+                        && rightPart[j-1].name!= ")" && rightPart[j - 1].TokenType != Type.Variable && rightPart[j - 1].TokenType != Type.Integer)
                         {
                             localFlag = true;
                             openParenthesis = rightPart[j + 1];
@@ -454,6 +459,28 @@ namespace Compiler
 
                             IntOrVariables.Push(result);
                         }
+
+                        if (localFlag && oper.name == "(")
+                        {
+                            if (oper.index == openParenthesis.index)
+                            {
+                                int result = IntOrVariables.Pop();
+                                result = -result;
+                                IntOrVariables.Push(result);
+                                localFlag = false;
+                            }
+                        }
+
+                        if (flag && oper.name == "(")
+                        {
+                            if (oper.index == globalOpenPar.index)
+                            {
+                                int result = IntOrVariables.Pop();
+                                result = -result;
+                                IntOrVariables.Push(result);
+                                flag = false;
+                            }
+                        }
                     }
                 }
 
@@ -518,8 +545,8 @@ namespace Compiler
                     result = (int)Math.Pow(FirstNumber, SecondNumber);
                     break;
             }
-            if (result == Int32.MaxValue) result = result+ 1000000;
-            if (result == Int32.MinValue) result = result-1000000;
+            //if (result == Int32.MaxValue) result = result+1000000;
+            if (result == Int32.MinValue) result = result-100000000;
         }
     }
 }
