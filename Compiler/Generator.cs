@@ -18,6 +18,7 @@ namespace Compiler
         };
         string[] ArrOfOper = new string[]
         { "+", "-", "/", "*" };
+        private bool PowFlag = false;
 
         public Generator(AnalyzerOfTokens analyzer)
         {
@@ -255,13 +256,29 @@ namespace Compiler
                     }
                     else if(!isChanged)
                     {
-                        if(rightPart[0].name != "(")
+                        if(rightPart[0].name=="-" && rightPart[1].name == "(")
+                        {
+                            for(int k=2;k<rightPart.Count;k++)
+                            {
+                                if (rightPart[k].name == ")")
+                                {
+                                    if (k + 1 < rightPart.Count && rightPart[k + 1].name == "^")
+                                    {
+                                        PowFlag = true;
+                                        rightPart.RemoveAt(0);
+                                        break;
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                        if(rightPart[0].name != "(" && !PowFlag)
                         {
                             flag = true;
                             globalOpenPar = rightPart[1];
                             rightPart.RemoveAt(0);
                         }
-                        else
+                        else if(!PowFlag)
                         {
                             operators.Push(rightPart[0]);
                             rightPart.RemoveAt(0);
@@ -297,6 +314,7 @@ namespace Compiler
                     #region минус перед значением
                     if (j > 0)
                     {
+
                         if (rightPart[j].name == "-" && (rightPart[j - 1].name != ")" && rightPart[j-1].TokenType!=Type.Variable && rightPart[j-1].TokenType!=Type.Integer)
                             && rightPart[j + 1].TokenType != Type.Operator && operators.Peek().name == "(")
                         {
@@ -307,6 +325,19 @@ namespace Compiler
                         if (rightPart[j].name == "-" && operators.Count > 0 && operators.Peek().name == "(" && j + 1 < rightPart.Count && rightPart[j + 1].name == "("
                         && rightPart[j-1].name!= ")" && rightPart[j - 1].TokenType != Type.Variable && rightPart[j - 1].TokenType != Type.Integer)
                         {
+                            for (int k = j+2; k < rightPart.Count; k++)
+                            {
+                                if(rightPart[k].name == ")")
+                                {
+                                    if(k+1<rightPart.Count && rightPart[k+1].name=="^")
+                                    {
+                                        PowFlag=true;
+                                        break;
+                                    }
+                                    break;
+                                }
+                            }
+
                             localFlag = true;
                             openParenthesis = rightPart[j + 1];
                             continue;
@@ -319,6 +350,11 @@ namespace Compiler
                             rightPart[j + 1].tokenValue = -rightPart[j + 1].tokenValue;
                             continue;
                         }
+
+                        /*if(rightPart[j].name=="-" && rightPart[j+1].name=="(")
+                        {
+
+                        }*/
                     }
 
                     if (rightPart[j].name == "-" && operators.Count>0 && operators.Peek().name == "(" && j + 1 < rightPart.Count && rightPart[j + 1].name == "("
@@ -543,6 +579,11 @@ namespace Compiler
                     break;
                 case "^":
                     result = (int)Math.Pow(FirstNumber, SecondNumber);
+                    if(PowFlag)
+                    {
+                        result = -result;
+                        PowFlag = false;
+                    }
                     break;
             }
             //if (result == Int32.MaxValue) result = result+1000000;

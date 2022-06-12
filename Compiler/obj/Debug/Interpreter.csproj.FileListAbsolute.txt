@@ -126,3 +126,19 @@ D:\Загрузки\newcompiler\Compiler-rich\Compiler-rich\Compiler\obj\Debug\I
 D:\Загрузки\newcompiler\Compiler-rich\Compiler-rich\Compiler\obj\Debug\Interpreter.csproj.CoreCompileInputs.cache
 D:\Загрузки\newcompiler\Compiler-rich\Compiler-rich\Compiler\obj\Debug\Compiler.exe
 D:\Загрузки\newcompiler\Compiler-rich\Compiler-rich\Compiler\obj\Debug\Compiler.pdb
+C:\Users\user\Downloads\Compiler-rich (1)\Compiler-rich\Compiler\bin\Debug\Compiler.exe.config
+C:\Users\user\Downloads\Compiler-rich (1)\Compiler-rich\Compiler\bin\Debug\Compiler.exe
+C:\Users\user\Downloads\Compiler-rich (1)\Compiler-rich\Compiler\bin\Debug\Compiler.pdb
+C:\Users\user\Downloads\Compiler-rich (1)\Compiler-rich\Compiler\obj\Debug\Interpreter.csproj.AssemblyReference.cache
+C:\Users\user\Downloads\Compiler-rich (1)\Compiler-rich\Compiler\obj\Debug\Interpreter.csproj.SuggestedBindingRedirects.cache
+C:\Users\user\Downloads\Compiler-rich (1)\Compiler-rich\Compiler\obj\Debug\MainWindow.g.cs
+C:\Users\user\Downloads\Compiler-rich (1)\Compiler-rich\Compiler\obj\Debug\App.g.cs
+C:\Users\user\Downloads\Compiler-rich (1)\Compiler-rich\Compiler\obj\Debug\Compiler_MarkupCompile.cache
+C:\Users\user\Downloads\Compiler-rich (1)\Compiler-rich\Compiler\obj\Debug\Compiler_MarkupCompile.lref
+C:\Users\user\Downloads\Compiler-rich (1)\Compiler-rich\Compiler\obj\Debug\MainWindow.baml
+C:\Users\user\Downloads\Compiler-rich (1)\Compiler-rich\Compiler\obj\Debug\Compiler.g.resources
+C:\Users\user\Downloads\Compiler-rich (1)\Compiler-rich\Compiler\obj\Debug\Compiler.Properties.Resources.resources
+C:\Users\user\Downloads\Compiler-rich (1)\Compiler-rich\Compiler\obj\Debug\Interpreter.csproj.GenerateResource.cache
+C:\Users\user\Downloads\Compiler-rich (1)\Compiler-rich\Compiler\obj\Debug\Interpreter.csproj.CoreCompileInputs.cache
+C:\Users\user\Downloads\Compiler-rich (1)\Compiler-rich\Compiler\obj\Debug\Compiler.exe
+C:\Users\user\Downloads\Compiler-rich (1)\Compiler-rich\Compiler\obj\Debug\Compiler.pdb
