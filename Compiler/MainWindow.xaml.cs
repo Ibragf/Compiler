@@ -22,6 +22,9 @@ namespace Compiler
     public partial class MainWindow : Window
     {
         string formula_text;
+        Run firstPart;
+        Run secondPart;
+        Run ErrorSymbol;
         public MainWindow()
         {
             InitializeComponent();
@@ -30,14 +33,22 @@ namespace Compiler
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
+            InputText.Foreground = Brushes.Black;
             string[] lines = null;
             try
             {
                 OutputText.Text=String.Empty;
                 OutputText.Foreground = Brushes.Black;
+                string text= new TextRange(InputText.Document.ContentStart, InputText.Document.ContentEnd).Text;
 
-                Tokenizer tokenizer = new Tokenizer(InputTextBox.Text);
+                if (firstPart != null) firstPart.Foreground = Brushes.Black;
+                if (secondPart != null) secondPart.Foreground = Brushes.Black;
+                if (ErrorSymbol != null) ErrorSymbol.Foreground = Brushes.Black;
+
+                Tokenizer tokenizer = new Tokenizer(text);
+                tokenizer.Replacement();
                 lines = tokenizer.lines;
+                tokenizer.DevideIntoTokens();
                 AnalyzerOfTokens analyzer = new AnalyzerOfTokens(tokenizer);
                 Generator generator = new Generator(analyzer);
 
@@ -58,25 +69,64 @@ namespace Compiler
             catch (MyException ex)
             {
                 OutputText.Foreground = Brushes.Red;
-                OutputText.Text=ex.Message+"\n"+"Строка: "+$"{ex.line}\n"+"Слово: "+$"{ex.index}\n";
+                OutputText.Text=ex.Message+"\n"+"Строка: "+$"{ex.line}";
                 string ErrorText = lines[ex.line - 1];
                 string[] words = ErrorText.Split(' ');
-                words[ex.index - 1] = "{"+words[ex.index-1]+"}";
+                //words[ex.index - 1] = words[ex.index-1];
                 StringBuilder builder=new StringBuilder();
 
                 for (int i=0;i<words.Length;i++)
                 {
-                    builder.Append($"{words[i]} ");
+                    builder.Append($"{words[i]}");
                 }
 
-                builder.Replace("\r\n", String.Empty);
-                string text= "["+ builder.ToString()+"]";
-                int index=text.IndexOf("{");
-                string scape = new string(' ', index+words[ex.index-1].Length/2);
-                scape += "↑";
-                text += "\n" + scape;
-                OutputText.Text+=text;
+                firstPart=new Run();
+                ErrorSymbol = new Run();
+                ErrorSymbol.Foreground = Brushes.Red;
+                secondPart=new Run();
 
+                StringBuilder changeText=new StringBuilder();
+                for (int i=0;i<lines.Length;i++)
+                {
+                    if (i == ex.line - 1)
+                    {
+                        break;
+                    }
+                    changeText.Append(lines[i]+"\n");
+                }
+                for (int i=0;i<words.Length;i++)
+                {
+                    if(i==ex.index-1)
+                    {
+                        ErrorSymbol.Text=words[i];
+                        firstPart.Text=changeText.ToString();
+                        changeText.Clear();
+                        for (int j=i+1;j<words.Length;j++)
+                        {
+                            changeText.Append(words[j]);
+                        } 
+                        changeText.Append('\n');
+                        break;
+                    }
+                    changeText.Append(words[i]);
+                }
+                for (int i=ex.line;  i< lines.Length; i++)
+                {
+                    if(i==lines.Length-2)
+                    {
+                        changeText.Append(lines[i]);
+                        break;
+                    }
+                    changeText.Append(lines[i]+"\n");
+                }
+                secondPart.Text=changeText.ToString().Replace(" ", String.Empty);
+
+                Paragraph paragraph=new Paragraph();
+                InputText.Document.Blocks.Clear();
+                InputText.Document.Blocks.Add(paragraph);
+                paragraph.Inlines.Add(firstPart);
+                paragraph.Inlines.Add(ErrorSymbol);
+                paragraph.Inlines.Add(secondPart);
             }
         }
 
@@ -84,26 +134,38 @@ namespace Compiler
         //нумерация строк в LineNumber(textbox)
         private void InputTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
+            string richText = new TextRange(InputText.Document.ContentStart, InputText.Document.ContentEnd).Text;
+
             string text=String.Empty;
-            for (int i=0; i<InputTextBox.LineCount; i++)
+            for (int i=0; i<richText.Count(x=> x =='\n'); i++)
             {
                 text+=(i+1)+"\n";
             }
             LineNumber.Text = text;
 
+            //TextPointer line = InputText.CaretPosition;
+            
             //прокрутка при достижении каретки последней линии или линии больше 27 строки
-            int line = InputTextBox.GetLineIndexFromCharacterIndex(InputTextBox.CaretIndex) + 1;
+            /*int line = InputTextBox.GetLineIndexFromCharacterIndex(InputTextBox.CaretIndex) + 1;
             if (line == InputTextBox.LineCount||line>27)
             {
                 InputTextBox.LineDown();
-            }
+            }*/
         }
 
         //синхронизация прокрутки LineNumber и InputTextBox
         private void LineNumber_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
-            var textToSync = (sender == LineNumber) ? InputTextBox : LineNumber;
-            textToSync.ScrollToVerticalOffset(e.VerticalOffset);
+            if(sender == LineNumber)
+            {
+                var textToSync = InputText;
+                textToSync.ScrollToVerticalOffset(e.VerticalOffset);
+            }
+            else
+            {
+                var textToSync = LineNumber;
+                textToSync.ScrollToVerticalOffset(e.VerticalOffset);
+            }
         }
 
         public async void uploadFormula()

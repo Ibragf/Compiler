@@ -12,7 +12,7 @@ namespace Compiler
         public readonly int index;
         private Type tokenType;
         public readonly string name;
-        public int? tokenValue=null;
+        public long? tokenValue=null;
         private int? priorityOfOperator = null;
 
 
@@ -48,5 +48,21 @@ namespace Compiler
             this.index = index;
             this.name = name;
         } 
+
+        public string nameOfType()
+        {
+            switch (tokenType)
+            {
+                case Type.Error: return "ошибка";
+                case Type.Integer: return "целое число";
+                case Type.Variable: return "переменная";
+                case Type.BeginBorder: return "begin";
+                case Type.EndBorder: return "end";
+                case Type.Keyword: return $"ключевое слово {name}";
+                case Type.Mark: return "метка";
+                case Type.Operator: return "математическая операция";
+            }
+            return "DON'T HAVE nameOFtype";
+        }
     }
 }
