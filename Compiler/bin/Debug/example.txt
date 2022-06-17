@@ -1,0 +1,12 @@
+Begin
+
+Integer 21 312
+Real asd asd
+
+
+new=foo+per
+per=54*10^2
+var=per/100
+
+
+End
