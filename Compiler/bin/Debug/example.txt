@@ -1,0 +1,11 @@
+Begin
+
+Integer 21 312
+Real asd asd
+
+per=50-(-(10+5)^2^2^2^2)
+new=100*4-20*5000/25
+var=25-per/1000
+
+
+End

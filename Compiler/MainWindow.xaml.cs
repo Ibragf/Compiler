@@ -29,6 +29,7 @@ namespace Compiler
         {
             InitializeComponent();
             uploadFormula();
+            uploadExample();
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -98,7 +99,7 @@ namespace Compiler
                 {
                     if(i==ex.index-1)
                     {
-                        ErrorSymbol.Text=words[i];
+                        ErrorSymbol.Text=words[i]+" ";
                         firstPart.Text=changeText.ToString();
                         changeText.Clear();
                         for (int j=i+1;j<words.Length;j++)
@@ -127,6 +128,10 @@ namespace Compiler
                 paragraph.Inlines.Add(firstPart);
                 paragraph.Inlines.Add(ErrorSymbol);
                 paragraph.Inlines.Add(secondPart);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
             }
         }
 
@@ -168,15 +173,30 @@ namespace Compiler
             }
         }
 
-        public async void uploadFormula()
+        public void uploadFormula()
         {
             using (FileStream fstream = File.OpenRead("formula.txt"))
             {
                 byte[] buffer = new byte[fstream.Length];
-                await fstream.ReadAsync(buffer,0, buffer.Length);
+                fstream.Read(buffer,0, buffer.Length);
                 formula.Text=Encoding.UTF8.GetString(buffer);
             }
         }
 
+
+        public void uploadExample()
+        {
+            using(FileStream fs=File.OpenRead("example.txt"))
+            {
+                byte[] buffer=new byte[fs.Length];
+                fs.Read(buffer,0,buffer.Length);
+
+                Paragraph paragraph = new Paragraph();
+                InputText.Document.Blocks.Clear();
+                InputText.Document.Blocks.Add(paragraph);
+
+                paragraph.Inlines.Add(new Run(Encoding.UTF8.GetString(buffer)));
+            }
+        }
     }
 }

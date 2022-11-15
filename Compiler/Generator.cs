@@ -19,6 +19,8 @@ namespace Compiler
         string[] ArrOfOper = new string[]
         { "+", "-", "/", "*" };
         private bool PowFlag = false;
+        private int PowCount = 0;
+        private int PowCountInMethod = 0;
 
         public Generator(AnalyzerOfTokens analyzer)
         {
@@ -32,6 +34,7 @@ namespace Compiler
                 CheckDefinations();
                 isParenthesesBalanced();
                 SeparatorOfExpressions();
+                CheckRightParts();
                 CheckRightPart();
                 Calculate();
             }
@@ -42,7 +45,19 @@ namespace Compiler
             return variables;
         }
 
-
+        private void CheckRightParts()
+        {
+            foreach (var expression in RightPartsOfExpressions)
+            {
+                for (int i = 0; i < expression.Count; i++)
+                {
+                    if((expression[i].TokenType==Type.Variable || expression[i].TokenType==Type.Integer) && i+1<expression.Count && (expression[i+1].TokenType==Type.Variable || expression[i+1].TokenType==Type.Integer))
+                    {
+                        throw new MyException($"Между {expression[i].nameOfType()} и {expression[i+1].nameOfType()} нет математической операции", expression[i].line, expression[i].index);
+                    }
+                }
+            }
+        }
         private void CheckDefinations()
         {
             if(Definations.Count==0)
@@ -262,13 +277,19 @@ namespace Compiler
                             {
                                 if (rightPart[k].name == ")")
                                 {
-                                    if (k + 1 < rightPart.Count && rightPart[k + 1].name == "^")
+                                    if(k+1<rightPart.Count && rightPart[k+1].name=="^") PowCount++;
+                                    if(k+2==rightPart.Count-1 && rightPart[k+1].name=="^")
                                     {
                                         PowFlag = true;
                                         rightPart.RemoveAt(0);
                                         break;
                                     }
-                                    break;
+                                    if (k + 3 < rightPart.Count && rightPart[k + 1].name == "^" && rightPart[k+3].name!="^")
+                                    {
+                                        PowFlag = true;
+                                        rightPart.RemoveAt(0);
+                                        break;
+                                    }
                                 }
                             }
                         }
@@ -329,17 +350,36 @@ namespace Compiler
                             {
                                 if(rightPart[k].name == ")")
                                 {
-                                    if(k+1<rightPart.Count && rightPart[k+1].name=="^")
+                                    if(k+2==rightPart.Count-1 && rightPart[k+1].name=="^")
                                     {
+                                        PowCount++;
+                                        PowFlag = true;
+                                        break;
+                                    }
+                                    if(k+3<rightPart.Count && rightPart[k+1].name=="^" && rightPart[k+3].name!="^")
+                                    {
+                                        PowCount++;
                                         PowFlag=true;
                                         break;
                                     }
-                                    break;
+                                    while(k+3<rightPart.Count)
+                                    {
+                                        if(rightPart[k+1].name=="^") PowCount++;
+                                        if (k + 3 < rightPart.Count && rightPart[k + 1].name == "^" && rightPart[k + 3].name != "^")
+                                        {
+                                            PowFlag = true;
+                                            break;
+                                        }
+                                        k++;
+                                    }
                                 }
                             }
 
-                            localFlag = true;
-                            openParenthesis = rightPart[j + 1];
+                            if (!PowFlag)
+                            {
+                                localFlag = true;
+                                openParenthesis = rightPart[j + 1];
+                            }
                             continue;
                         }
                     }
@@ -349,6 +389,38 @@ namespace Compiler
                         {
                             rightPart[j + 1].tokenValue = -rightPart[j + 1].tokenValue;
                             continue;
+                        }
+
+                        if (rightPart[j].name == "-" && operators.Count > 0 && operators.Peek().name == "(" && j + 1 < rightPart.Count && rightPart[j + 1].name == "(")
+                        {
+                            for (int k = j+2; k < rightPart.Count; k++)
+                            {
+                                if (rightPart[k].name == ")")
+                                {
+                                    if (k + 2 == rightPart.Count - 1 && rightPart[k + 1].name == "^")
+                                    {
+                                        PowCount++;
+                                        PowFlag = true;
+                                        break;
+                                    }
+                                    if (k + 3 < rightPart.Count && rightPart[k + 1].name == "^" && rightPart[k + 3].name != "^")
+                                    {
+                                        PowCount++;
+                                        PowFlag = true;
+                                        break;
+                                    }
+                                    while (k + 3 < rightPart.Count)
+                                    {
+                                        if (rightPart[k + 1].name == "^") PowCount++;
+                                        if (k + 3 < rightPart.Count && rightPart[k + 1].name == "^" && rightPart[k + 3].name != "^")
+                                        {
+                                            PowFlag = true;
+                                            break;
+                                        }
+                                        k++;
+                                    }
+                                }
+                            }
                         }
 
                         /*if(rightPart[j].name=="-" && rightPart[j+1].name=="(")
@@ -446,7 +518,7 @@ namespace Compiler
 
                         if (rightPart[j].PriorityOfOperator <= oper.PriorityOfOperator)
                         {
-                            while (operators.Count != 0 || oper.name == "(" || rightPart[j].PriorityOfOperator > oper.PriorityOfOperator)
+                            while (operators.Count != 0 && ( oper.name == "(" || rightPart[j].PriorityOfOperator > oper.PriorityOfOperator))
                             {
                                 oper = operators.Pop();
                                 int SecondNumber = IntOrVariables.Pop();
@@ -579,15 +651,20 @@ namespace Compiler
                     break;
                 case "^":
                     result = (int)Math.Pow(FirstNumber, SecondNumber);
-                    if(PowFlag)
+                    if (result == Int32.MinValue) throw new MyException("Превышено ограничение максимального значения целого числа", oper.line, oper.index);
+                    if (PowFlag && PowCount == PowCountInMethod + 1)
                     {
+                        PowCount = 0;
+                        PowCountInMethod = 0;
                         result = -result;
                         PowFlag = false;
                     }
+                    else PowCountInMethod++;
                     break;
             }
             //if (result == Int32.MaxValue) result = result+1000000;
-            if (result == Int32.MinValue) result = result-100000000;
+            if (result == Int32.MinValue) throw new MyException("Превышено ограничение максимального значения целого числа",oper.line, oper.index);
+            
         }
     }
 }
